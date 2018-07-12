@@ -6,7 +6,7 @@ with open('requirements.txt') as fp:
 setup(
     name='remote_event_bundle',
     packages=['remote_event_bundle'],
-    version='0.1',
+    version='0.2',
     description='Remote events support for applauncher',
     author='Alvaro Garcia Gomez',
     author_email='maxpowel@gmail.com',
