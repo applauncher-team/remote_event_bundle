@@ -1,12 +1,13 @@
 # Remote events for applauncher
 
 This bundle is designed for distributed events among multiple applauncher applications. At this moment
-only redis broker is supported
+redis and kafka broker are supported
 
 Installation
 -----------
 ```bash
 pip install remote_event_bundle 
+pip install redis_bundle 
 ```
 Then add to your main.py
 ```python
@@ -18,9 +19,24 @@ bundle_list = [
     remote_event_bundle.RemoteEventBundle()
 ]
 ```
+and for kafka
+```bash
+pip install remote_event_bundle 
+pip install kafka_bundle 
+```
+Then add to your main.py
+```python
+import remote_event_bundle
+import kafka_bundle
 
+bundle_list = [
+    kafka_bundle.KafkaBundle(),
+    remote_event_bundle.RemoteEventBundle()
+]
+```
 Configuration
 -------------
+There default broker is redis. This configuration is suitable for redis
 ```yml
 remote_event:
   events:
@@ -28,6 +44,16 @@ remote_event:
 ```
 Check [redis_bundle](https://github.com/applauncher-team/redis_bundle) documentation if need a custom
 redis configuration
+
+For kafka, you can use this config
+```yml
+remote_event:
+  broker: kafka
+  group_id: file-consumer  # hostname is used by default if no group_id is provided
+  events:
+    - name: new_file_event
+```
+Check [kafka_bundle](https://github.com/applauncher-team/kafka_bundle) for the kafka configuration
 
 How does it work?
 -----------------
