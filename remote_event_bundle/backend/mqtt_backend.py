@@ -20,18 +20,15 @@ class MqttBackend(object):
 
     @inject.params(event_manager=EventManager)
     def register_events(self, events, event_manager: EventManager):
+        # event_manager.add_listener(MqttConnectEvent, self.on_connect)
         event_manager.add_listener(MqttMessageEvent, self.callback)
         for i in events:
             self.client.subscribe(i.name)
-            print("subscribed to", i.name)
+            self.logger.info(f"subscribed to {i.name}")
 
     def callback(self, event: MqttMessageEvent):
         em = inject.instance(EventManager)
-        print(event.event_name)
-        print(event.message)
-        print(event.userdata)
-        return
-        event_data = json.loads(message.value())
+        event_data = json.loads(event.message.payload)
         event = Event()
         event.__dict__ = event_data["data"]
         event._signals = event_data["signals"]
@@ -42,8 +39,8 @@ class MqttBackend(object):
         if not hasattr(event, "_propagated"):
             data = event.__dict__
             try:
-                r = self.topic_manager.publish(event.event_name, json.dumps({"data": data, "signals": event._signals}).encode())
-                self.logger.info("Propagated event" + event.event_name)
+                self.client.publish(event.event_name, json.dumps({"data": data, "signals": event._signals}).encode(), qos=2)
+                self.logger.info(f"Propagated event {event.event_name}")
                 event._propagated = True
             except Exception as e:
                 import traceback
