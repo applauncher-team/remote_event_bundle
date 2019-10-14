@@ -51,11 +51,37 @@ bundle_list = [
 ]
 ```
 
+and finally amqp support.
+```bash
+pip install remote_event_bundle 
+pip install amqp_bundle 
+```
+```python
+import remote_event_bundle
+import mqtt_bundle
+
+bundle_list = [
+    amqp_bundle.AmqpBundle(),
+    remote_event_bundle.RemoteEventBundle()
+]
+```
+
 Configuration
 -------------
-There default backend is redis. This configuration is suitable for redis
+The default is amqp. You can specify the backend or not. I usually prefer to put it to avoid any future problem
 ```yml
 remote_event:
+  backend: amqp
+  events:
+    - name: new_file_event
+```
+Check [amqp_bundle](https://github.com/applauncher-team/amqp_bundle) for amqp configuration
+
+
+This configuration is suitable for redis
+```yml
+remote_event:
+  backend: redis
   events:
     - name: new_file_event
 ```

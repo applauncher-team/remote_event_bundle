@@ -3,7 +3,7 @@ import paho.mqtt.client as mqtt
 import inject
 import logging
 import socket
-from applauncher.kernel import Kernel, EventManager, Event
+from applauncher.kernel import EventManager, Event
 import json
 
 
@@ -20,7 +20,6 @@ class MqttBackend(object):
 
     @inject.params(event_manager=EventManager)
     def register_events(self, events, event_manager: EventManager):
-        # event_manager.add_listener(MqttConnectEvent, self.on_connect)
         event_manager.add_listener(MqttMessageEvent, self.callback)
         for i in events:
             self.client.subscribe(i.name)

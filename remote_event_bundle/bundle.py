@@ -12,7 +12,7 @@ class RemoteEventBundle(object):
         self.config_mapping = {
             "remote_event": {
                 "group_id": "",
-                "backend": "redis",
+                "backend": "amqp",
                 "events": [{"name": {"type": "string"}}]
             }
         }
