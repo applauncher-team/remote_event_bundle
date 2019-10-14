@@ -1,12 +1,12 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 with open('requirements.txt') as fp:
     install_requires = fp.read()
 
 setup(
     name='remote_event_bundle',
-    packages=['remote_event_bundle'],
-    version='1.2',
+    packages=find_packages(),
+    version='1.3',
     description='Remote events support for applauncher',
     author='Alvaro Garcia Gomez',
     author_email='maxpowel@gmail.com',

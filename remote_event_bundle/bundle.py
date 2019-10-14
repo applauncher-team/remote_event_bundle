@@ -1,8 +1,8 @@
 from .event import RemoteEvent
 import inject
-from applauncher.kernel import Configuration, InjectorReadyEvent, Kernel, KernelShutdownEvent
+from applauncher.kernel import Configuration, InjectorReadyEvent, KernelShutdownEvent
 import logging
-import remote_event_bundle.backend as backends
+import importlib
 
 
 class RemoteEventBundle(object):
@@ -28,7 +28,8 @@ class RemoteEventBundle(object):
 
     @inject.params(config=Configuration)
     def injector_ready(self, event, config):
-        backend = getattr(backends, config.remote_event.backend)
+        backend_module = importlib.import_module(f'remote_event_bundle.backend.{config.remote_event.backend}_backend')
+        backend = getattr(backend_module, f"{config.remote_event.backend.capitalize()}Backend")
         self.backend = backend(group_id=config.remote_event.group_id)
         self.backend.register_events(config.remote_event.events)
 
