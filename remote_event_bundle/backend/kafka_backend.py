@@ -28,10 +28,15 @@ class KafkaBackend(object):
 
     def callback(self, message):
         em = inject.instance(EventManager)
-        event_data = json.loads(message.value())
         event = Event()
-        event.__dict__ = event_data["data"]
-        event._signals = event_data["signals"]
+        event.__dict__ = json.loads(message.value())
+        headers = message.headers()
+        signals = []
+        if headers:
+            for key, value in headers:
+                if key == "signals":
+                    signals = json.loads(value)
+        event._signals = signals
         event._propagated = True
         em.dispatch(event)
 
@@ -39,7 +44,7 @@ class KafkaBackend(object):
         if not hasattr(event, "_propagated"):
             data = event.__dict__
             try:
-                r = self.kafka.produce(event.event_name, json.dumps({"data": data, "signals": event._signals}).encode())
+                r = self.kafka.produce(topic=event.event_name, message=json.dumps(data).encode(), headers={"signals": json.dumps(event._signals)})
                 self.logger.info("Propagated event" + event.event_name)
                 event._propagated = True
             except Exception as e:

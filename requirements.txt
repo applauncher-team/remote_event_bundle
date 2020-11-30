@@ -1,1 +1,1 @@
-applauncher==1.44
+applauncher>=1.44
