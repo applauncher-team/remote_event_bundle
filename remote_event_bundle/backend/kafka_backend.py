@@ -19,12 +19,13 @@ class KafkaBackend(object):
 
     def register_events(self, events):
         kernel = inject.instance(Kernel)
-        kernel.run_service(lambda event_list, gid: self.kafka.subscribe(
-            topics=[i.name for i in event_list],
-            group_id=gid,
-            consumer_callback=self.callback,
-            poll_timeout=2
-        ), events, self.group_id)
+        if len(events) > 0:
+            kernel.run_service(lambda event_list, gid: self.kafka.subscribe(
+                topics=[i.name for i in event_list],
+                group_id=gid,
+                consumer_callback=self.callback,
+                poll_timeout=2
+            ), events, self.group_id)
 
     def callback(self, message):
         em = inject.instance(EventManager)
