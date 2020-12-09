@@ -46,7 +46,7 @@ class KafkaBackend(object):
             data = event.__dict__
             try:
                 r = self.kafka.produce(topic=event.event_name, message=json.dumps(data).encode(), headers={"signals": json.dumps(event._signals)})
-                self.logger.info("Propagated event" + event.event_name)
+                self.logger.info("Propagated event " + event.event_name)
                 event._propagated = True
             except Exception as e:
                 import traceback
