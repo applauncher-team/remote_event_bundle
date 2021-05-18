@@ -1,8 +1,10 @@
-from .event import RemoteEvent
-import inject
-from applauncher.kernel import Configuration, KernelReadyEvent, KernelShutdownEvent
 import logging
 import importlib
+
+import inject
+from applauncher.kernel import Configuration, KernelReadyEvent, KernelShutdownEvent
+
+from .event import RemoteEvent
 
 
 class RemoteEventBundle(object):
