@@ -1,6 +1,6 @@
 from .event import RemoteEvent
 import inject
-from applauncher.kernel import Configuration, InjectorReadyEvent, KernelShutdownEvent
+from applauncher.kernel import Configuration, KernelReadyEvent, KernelShutdownEvent
 import logging
 import importlib
 
@@ -18,16 +18,16 @@ class RemoteEventBundle(object):
         }
 
         self.event_listeners = [
-            (InjectorReadyEvent, self.injector_ready),
             (RemoteEvent, self.propagate_remote_event),
-            (KernelShutdownEvent, self.kernel_shutdown)
+            (KernelReadyEvent, self.kernel_ready),
+            (KernelShutdownEvent, self.kernel_shutdown),
         ]
 
         self.run = True
         self.backend = None
 
     @inject.params(config=Configuration)
-    def injector_ready(self, event, config):
+    def kernel_ready(self, event, config):
         backend_module = importlib.import_module(f'remote_event_bundle.backend.{config.remote_event.backend}_backend')
         backend = getattr(backend_module, f"{config.remote_event.backend.capitalize()}Backend")
         self.backend = backend(group_id=config.remote_event.group_id)
