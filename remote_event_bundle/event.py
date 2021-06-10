@@ -1,4 +1,4 @@
-from applauncher.kernel import Event
+from applauncher.event import Event
 
 
 class RemoteEvent(Event):

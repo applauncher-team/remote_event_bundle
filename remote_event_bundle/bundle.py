@@ -1,8 +1,45 @@
-from .event import RemoteEvent
-import inject
-from applauncher.kernel import Configuration, InjectorReadyEvent, KernelShutdownEvent
 import logging
 import importlib
+from typing import List
+from pydantic import BaseModel
+from dependency_injector import containers, providers
+from applauncher.event import KernelReadyEvent
+from applauncher.applauncher import Configuration, ServiceContainer
+from .event import RemoteEvent
+
+logger = logging.getLogger("remote-event")
+
+
+class EventConfig(BaseModel):
+    name: str
+
+
+class RemoteEventConfig(BaseModel):
+    backend: str = "kafka"
+    events: List[EventConfig] = []
+
+
+def backend_loader(configuration):
+    logger.info("Initializing backend")
+    backend_module = \
+        importlib.import_module(f'remote_event_bundle.backend.{configuration.remote_event.backend}_backend')
+    backend_class = getattr(backend_module, f"{configuration.remote_event.backend.capitalize()}BackendContainer")
+    backend = backend_class(
+        configuration=configuration
+    )
+    yield backend
+    logger.info("Stopping backend")
+    backend.shutdown_resources()
+
+
+class RemoteEventContainer(containers.DeclarativeContainer):
+    config = providers.Dependency(instance_of=RemoteEventConfig)
+    configuration = Configuration()
+
+    backend = providers.Resource(
+        backend_loader,
+        configuration=configuration
+    )
 
 
 class RemoteEventBundle(object):
@@ -10,33 +47,24 @@ class RemoteEventBundle(object):
     def __init__(self):
         self.logger = logging.getLogger("remote-event")
         self.config_mapping = {
-            "remote_event": {
-                "group_id": "",
-                "backend": "amqp",
-                "events": [{"name": {"type": "string"}}]
-            }
+            "remote_event": RemoteEventConfig
+        }
+
+        self.injection_bindings = {
+            "remote_event": RemoteEventContainer
         }
 
         self.event_listeners = [
-            (InjectorReadyEvent, self.injector_ready),
-            (RemoteEvent, self.propagate_remote_event),
-            (KernelShutdownEvent, self.kernel_shutdown)
+            (RemoteEvent, self.propagate_remote_event)
         ]
 
-        self.run = True
-        self.backend = None
+        self.services = [
+            ("remote-event-listener", self.event_listener, [], {})
+        ]
 
-    @inject.params(config=Configuration)
-    def injector_ready(self, event, config):
-        backend_module = importlib.import_module(f'remote_event_bundle.backend.{config.remote_event.backend}_backend')
-        backend = getattr(backend_module, f"{config.remote_event.backend.capitalize()}Backend")
-        self.backend = backend(group_id=config.remote_event.group_id)
-        self.backend.register_events(config.remote_event.events)
+    def event_listener(self):
+        ServiceContainer.remote_event.backend().listen()
 
     def propagate_remote_event(self, event):
-        if self.backend:
-            self.backend.propagate_remote_event(event)
+        ServiceContainer.remote_event.backend().propagate_remote_event(event)
 
-    def kernel_shutdown(self, event):
-        if self.backend:
-            self.backend.shutdown()
