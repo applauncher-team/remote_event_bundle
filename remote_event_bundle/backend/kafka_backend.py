@@ -52,10 +52,9 @@ def dispatch_event(message):
             event._signals = signals
         else:
             event._signals = [message.topic()]
-            
-        event._signals = signals
+
         event._propagated = True
-        ServiceContainer.event_manager.dispatch(event)
+        ServiceContainer.event_manager().dispatch(event)
     except Exception as e:
         logger.error(str(e))
 
