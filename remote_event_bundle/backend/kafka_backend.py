@@ -48,6 +48,11 @@ def dispatch_event(message):
             for key, value in headers:
                 if key == "signals":
                     signals = json.loads(value)
+        if signals:
+            event._signals = signals
+        else:
+            event._signals = [message.topic()]
+            
         event._signals = signals
         event._propagated = True
         ServiceContainer.event_manager.dispatch(event)
