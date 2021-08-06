@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "remote_event_bundle"
-version = "2.0.1"
+version = "2.0.2"
 description = "Remote events"
 authors = ["Alvaro Garcia <maxpowel@gmail.com>"]
 license = "Apache"
