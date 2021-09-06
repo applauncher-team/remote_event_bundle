@@ -42,6 +42,7 @@ def dispatch_event(message):
     try:
         event = Event()
         event.__dict__ = json.loads(message.value())
+        event.event_name = message.topic()
         headers = message.headers()
         signals = []
         if headers:
@@ -51,9 +52,9 @@ def dispatch_event(message):
         if signals:
             event._signals = signals
         else:
-            event._signals = [message.topic()]
+            event._signals = [event.event_name]  # Which will have the value of message.topic()
 
-        event._propagated = True
+        event._propagated = True        
         ServiceContainer.event_manager().dispatch(event)
     except Exception as e:
         logger.error(str(e))
