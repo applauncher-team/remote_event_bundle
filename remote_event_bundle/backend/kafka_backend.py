@@ -54,7 +54,7 @@ def dispatch_event(message):
         else:
             event._signals = [event.event_name]  # Which will have the value of message.topic()
 
-        event._propagated = True        
+        event._propagated = True
         ServiceContainer.event_manager().dispatch(event)
     except Exception as e:
         logger.error(str(e))
